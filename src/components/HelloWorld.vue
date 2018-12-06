@@ -1,79 +1,78 @@
 <template>
   <div>
     <el-form class="search-filters-form" label-width="80px" :model="searchFilters" status-icon>
-        <el-row :gutter="20" type="flex" justify="center">
-          <el-col :span="6">
-           <el-form-item label="承运商:">
-              <el-select v-model="searchFilters.carriesID" @change="startSearch" placeholder="请选择">
-                <el-option v-for="(item,key) in carriesSelect" :key="key" :label="item" :value="item"></el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="6">
-            <el-form-item label="液厂:">
-              <el-select v-model="searchFilters.fulidID" @change="startSearch" placeholder="请选择">
-                <el-option v-for="(item,key) in fulidSelect" :key="key" :label="item" :value="item"></el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
+      <el-row :gutter="20" type="flex" justify="center">
+        <el-col :span="6">
+          <el-form-item label="承运商:">
+            <el-select v-model="searchFilters.carriesID" @change="startSearch" placeholder="请选择">
+              <el-option v-for="(item,key) in carriesSelect" :key="key" :label="item" :value="item"></el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-form-item label="液厂:">
+            <el-select v-model="searchFilters.fulidID" @change="startSearch" placeholder="请选择">
+              <el-option v-for="(item,key) in fulidSelect" :key="key" :label="item" :value="item"></el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
-    <el-row> 
+    <el-row>
       <el-col :span="20" :offset="2" v-for="(echarItem,key,index) in echarData" :id="'eachrLine'+index" style="height:500px;margin-top:50px;"></el-col>
     </el-row>
   </div>
-
 </template>
 <script>
 export default {
   name: 'HelloWorld',
-  data () {
+  data() {
     return {
-      echarData:{},
-      myChart:[],
-      searchFilters:{
-        carriesID:"",
-        fulidID:""
+      echarData: {},
+      myChart: [],
+      searchFilters: {
+        carriesID: "",
+        fulidID: ""
       },
-      carriesSelect:[],
-      fulidSelect:[]
+      carriesSelect: [],
+      fulidSelect: []
     }
   },
 
-  mounted(){
-    
+  mounted() {
+
   },
 
   methods: {
-    startSearch:function(){
-      this.echarData={};
+    startSearch: function() {
+      this.echarData = {};
       this.getdrawLineData();
     },
-    handleEcharData:function(){
-      let num=0;
-      this.myChart=[];
-      for(let carries in this.echarData){
-        let dom = document.getElementById('eachrLine'+num);
+    handleEcharData: function() {
+      let num = 0;
+      this.myChart = [];
+      for (let carries in this.echarData) {
+        let dom = document.getElementById('eachrLine' + num);
         this.myChart[num] = this.$echarts.init(dom);
-        let opt=this.getOpt(this.echarData[carries],carries);
+        let opt = this.getOpt(this.echarData[carries], carries);
         this.myChart[num].setOption(opt);
         num++;
       }
     },
-    getOpt:function(carriesItem,title){
-      let seriesData=[];
-      let xarry=[];
-      let legend=[];
-      for(let item in carriesItem){
-        if(item=='xarry'){
-          xarry=carriesItem[item];
-        }else{
-          let optSe={};
-          optSe={
-            name:item,
-            type:'line',
+    getOpt: function(carriesItem, title) {
+      let seriesData = [];
+      let xarry = [];
+      let legend = [];
+      for (let item in carriesItem) {
+        if (item == 'xarry') {
+          xarry = carriesItem[item];
+        } else {
+          let optSe = {};
+          optSe = {
+            name: item,
+            type: 'line',
             stack: '',
-            data:carriesItem[item]
+            data: carriesItem[item]
           }
           legend.push(item);
           seriesData.push(optSe);
@@ -81,10 +80,10 @@ export default {
       }
       let obj = {
         toolbox: {
-            show: true,
-            feature: {
-                
-            }
+          show: true,
+          feature: {
+
+          }
         },
         grid: {
           left: '3%',
@@ -112,17 +111,17 @@ export default {
         yAxis: {
           type: 'value',
         },
-        series:seriesData 
+        series: seriesData
       }
       return obj;
     },
-    getdrawLineData:function(){
-      this.$$http("getdrawLineData",{carrier_name:this.searchFilters.carriesID,fluid_name:this.searchFilters.fulidID}).then(results=>{
-        if(results.data.code==0){
-          this.echarData=results.data.msg;
-          setTimeout(()=>{
+    getdrawLineData: function() {
+      this.$$http("getdrawLineData", { carrier_name: this.searchFilters.carriesID, fluid_name: this.searchFilters.fulidID }).then(results => {
+        if (results.data.code == 0) {
+          this.echarData = results.data.msg;
+          setTimeout(() => {
             this.handleEcharData();
-          },100)
+          }, 100)
         }
       });
       // let echarData={
@@ -209,29 +208,28 @@ export default {
       //       }
       //     }
       //   }
-        
-      },
-      getData:function(){
-        let getCarriesFuild=this.$$http('getCarriesFuild', {});
-        Promise.all([getCarriesFuild]).then(results => {
-          if(results[0].data.code==0){
-            this.carriesSelect=['全部'].concat(results[0].data.msg.carrier);
-            this.fulidSelect=['全部'].concat(results[0].data.msg.fluid);
-            this.searchFilters.carriesID="龙口市胜通物流有限公司";
-            this.getdrawLineData();
-          }
-        });
-        
-      }
+
+    },
+    getData: function() {
+      let getCarriesFuild = this.$$http('getCarriesFuild', {});
+      Promise.all([getCarriesFuild]).then(results => {
+        if (results[0].data.code == 0) {
+          this.carriesSelect = ['全部'].concat(results[0].data.msg.carrier);
+          this.fulidSelect = ['全部'].concat(results[0].data.msg.fluid);
+          this.searchFilters.carriesID = "龙口市胜通物流有限公司";
+          this.getdrawLineData();
+        }
+      });
+
+    }
   },
-  created(){
+  created() {
     this.getData();
-    
+
   },
 }
-</script>
 
+</script>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
 </style>

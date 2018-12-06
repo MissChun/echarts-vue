@@ -1,19 +1,27 @@
 const api = {
-	getCarriesFuild:{
-	    url: '/freight/loadbase',
-	    method: 'get',
-	    desc: '获取承运商',
-	    param: {
+  getCarriesFuild: {
+    url: '/freight/loadbase',
+    method: 'get',
+    desc: '获取承运商',
+    param: {
 
-	    }
-  	},
-  	getdrawLineData:{
-  		url: '/freight/loadfreight',
-	    method: 'get',
-	    desc: '获取图表数据',
-	    param: {
+    }
+  },
+  getdrawLineData: {
+    url: '/freight/loadfreight',
+    method: 'get',
+    desc: '获取图表数据',
+    param: {
 
-	    }
-  	}
+    }
+  },
+  getMapData: {
+    url: '/station_waybill/getswaybillinfo',
+    method: 'get',
+    desc: '获取站点订单分析数据',
+    param: {
+
+    }
+  }
 }
 export default api;
