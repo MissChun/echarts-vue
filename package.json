@@ -16,9 +16,10 @@
   "dependencies": {
     "axios": "^0.18.0",
     "echarts": "^4.2.0-rc.2",
+    "echarts-amap": "^1.0.0-rc.6",
+    "element-ui": "^2.4.5",
     "vue": "^2.5.2",
-    "vue-router": "^3.0.1",
-    "element-ui": "^2.4.5"
+    "vue-router": "^3.0.1"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",
