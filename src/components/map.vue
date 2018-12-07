@@ -55,10 +55,20 @@ export default {
           trigger: 'item',
           formatter: "{a} <br/>{b} : {c} ({d}%)"
         },
+        toolbox: {
+          show: true,
+          right: '20%',
+          feature: {
+            dataView: {
+              readOnly: false
+            },
+            saveAsImage: {}
+          }
+        },
         legend: {
           type: 'scroll',
           orient: 'vertical',
-          right: 10,
+          right: 50,
           top: 10,
           bottom: 20,
           data: this.echartsData.legendData,
@@ -67,9 +77,36 @@ export default {
         series: [{
           name: '销售总额',
           type: 'pie',
-          radius: '55%',
+          radius: ['40%', '65%'],
           center: ['40%', '50%'],
           data: this.echartsData.salsumData,
+          legendHoverLink: true,
+          itemStyle: {
+            emphasis: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
+          }
+        }, {
+          name: '销售单数',
+          type: 'pie',
+
+          label: {
+            normal: {
+              show: false,
+            },
+
+          },
+          labelLine: {
+            normal: {
+              show: false
+            }
+          },
+          radius: ['0%', '30%'],
+          center: ['40%', '50%'],
+          legendHoverLink: true,
+          data: this.echartsData.waycountData,
           itemStyle: {
             emphasis: {
               shadowBlur: 10,
@@ -92,7 +129,12 @@ export default {
           value: item.salsum
         }
       });
-      let waycountData = resultDataCopy.map(item => item.waycount);
+      let waycountData = resultDataCopy.map(item => {
+        return {
+          name: item.station_name,
+          value: item.waycount
+        }
+      });
       let legendData = resultDataCopy.map(item => item.station_name);
 
       let selectedData = {};
@@ -111,6 +153,49 @@ export default {
       let option = this.getOpt();
       this.myChart = this.$echarts.init(dom);
       this.myChart.setOption(option);
+
+      /*this.myChart.on('mouseover', 'series.pie', (params) => {
+        if (params.seriesIndex === 0) {
+          this.myChart.dispatchAction({
+            type: 'pieSelect',
+            // 可选，系列 index，可以是一个数组指定多个系列
+            seriesIndex: 1,
+            // 数据的 index，如果不指定也可以通过 name 属性根据名称指定数据
+            dataIndex: params.dataIndex,
+          })
+        } else {
+          this.myChart.dispatchAction({
+            type: 'pieSelect',
+            // 可选，系列 index，可以是一个数组指定多个系列
+            seriesIndex: 0,
+            // 数据的 index，如果不指定也可以通过 name 属性根据名称指定数据
+            dataIndex: params.dataIndex,
+          })
+        }
+      });
+
+      this.myChart.on('mouseout', 'series.pie', (params) => {
+        if (params.seriesIndex === 0) {
+          this.myChart.dispatchAction({
+            type: 'pieUnSelect',
+            // 可选，系列 index，可以是一个数组指定多个系列
+            seriesIndex: 1,
+            // 数据的 index，如果不指定也可以通过 name 属性根据名称指定数据
+            dataIndex: params.dataIndex,
+          })
+        } else {
+          this.myChart.dispatchAction({
+            type: 'pieUnSelect',
+            // 可选，系列 index，可以是一个数组指定多个系列
+            seriesIndex: 0,
+            // 数据的 index，如果不指定也可以通过 name 属性根据名称指定数据
+            dataIndex: params.dataIndex,
+          })
+        }
+      });*/
+
+
+
     },
     dateToStr: function(date) {
       let dateDetail = this.getDateDetail(date);
@@ -322,13 +407,13 @@ export default {
 
 #map-container {
   width: 100%;
-  height: 700px;
+  height: 1000px;
 }
 
 #echarts-container {
   width: 100%;
   padding-top: 20px;
-  height: 500px;
+  height: 1000px;
 }
 
 .fs-13 {
