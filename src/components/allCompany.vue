@@ -2,6 +2,13 @@
   <div>
     <el-form class="search-filters-form" label-width="150px" :model="searchFilters" status-icon>
       <el-row type="flex" justify="left">
+        <el-col :span="6">
+          <el-form-item label="公司名称:">
+            <el-select style="width:100%" v-model="searchFilters.companyName" clearable placeholder="请选择" @change="startSearch">
+              <el-option v-for="(item,key) in companyList" :key="key" :label="item.company" :value="item.company"></el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
         <el-col :span="12">
           <el-form-item label="业务结算完成时间:">
             <el-date-picker style="width:100%" editable="editable" v-model="searchFilters.timeParam" type="datetimerange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" value-format="yyyy-MM-dd HH:mm:ss" :default-time="['00:00:00', '23:59:59']" @change="startSearch">
@@ -19,13 +26,13 @@
 <script>
 require('echarts-amap')
 export default {
-  name: 'mapAalasis',
+  name: 'allCompany',
   data() {
     return {
       resultData: [],
       searchFilters: {
         timeParam: [new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date()],
-        companyName: '龙口胜通能源有限公司'
+        companyName: '',
       },
       map: '',
       markerList: '',
@@ -36,6 +43,7 @@ export default {
         selectedData: [],
         legendData: [],
       },
+      companyList: [],
       pageLoading: false,
 
     }
@@ -154,49 +162,6 @@ export default {
       let option = this.getOpt();
       this.myChart = this.$echarts.init(dom);
       this.myChart.setOption(option);
-
-      /*this.myChart.on('mouseover', 'series.pie', (params) => {
-        if (params.seriesIndex === 0) {
-          this.myChart.dispatchAction({
-            type: 'pieSelect',
-            // 可选，系列 index，可以是一个数组指定多个系列
-            seriesIndex: 1,
-            // 数据的 index，如果不指定也可以通过 name 属性根据名称指定数据
-            dataIndex: params.dataIndex,
-          })
-        } else {
-          this.myChart.dispatchAction({
-            type: 'pieSelect',
-            // 可选，系列 index，可以是一个数组指定多个系列
-            seriesIndex: 0,
-            // 数据的 index，如果不指定也可以通过 name 属性根据名称指定数据
-            dataIndex: params.dataIndex,
-          })
-        }
-      });
-
-      this.myChart.on('mouseout', 'series.pie', (params) => {
-        if (params.seriesIndex === 0) {
-          this.myChart.dispatchAction({
-            type: 'pieUnSelect',
-            // 可选，系列 index，可以是一个数组指定多个系列
-            seriesIndex: 1,
-            // 数据的 index，如果不指定也可以通过 name 属性根据名称指定数据
-            dataIndex: params.dataIndex,
-          })
-        } else {
-          this.myChart.dispatchAction({
-            type: 'pieUnSelect',
-            // 可选，系列 index，可以是一个数组指定多个系列
-            seriesIndex: 0,
-            // 数据的 index，如果不指定也可以通过 name 属性根据名称指定数据
-            dataIndex: params.dataIndex,
-          })
-        }
-      });*/
-
-
-
     },
     dateToStr: function(date) {
       let dateDetail = this.getDateDetail(date);
@@ -359,6 +324,13 @@ export default {
         }
       }
     },
+    getCompany() {
+      return this.$$http("getCompany").then(results => {
+        if (results.data.code == 0) {
+          this.companyList = results.data.data;
+        }
+      });
+    },
     startSearch() {
       this.getdata().then(result => {
         this.renderMarker();
@@ -379,9 +351,9 @@ export default {
     this.initMarkList();
     this.getdata().then(result => {
       this.renderMarker();
-
       this.setOption();
     });
+    this.getCompany();
 
   },
 }

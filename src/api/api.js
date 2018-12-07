@@ -22,6 +22,15 @@ const api = {
     param: {
 
     }
-  }
+  },
+  getCompany: {
+    url: '/station_waybill/loadcompany',
+    method: 'get',
+    desc: '默认加载所有有订单的贸易公司',
+    param: {
+
+    }
+  },
+
 }
 export default api;
