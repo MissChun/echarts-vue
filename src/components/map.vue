@@ -19,12 +19,13 @@
 <script>
 require('echarts-amap')
 export default {
-  name: 'HelloWorld',
+  name: 'mapAalasis',
   data() {
     return {
       resultData: [],
       searchFilters: {
         timeParam: [new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date()],
+        companyName: '龙口胜通能源有限公司'
       },
       map: '',
       markerList: '',
@@ -228,6 +229,7 @@ export default {
       return this.$$http("getMapData", {
         stime: startTimeStr,
         etime: endTimeStr,
+        companyname: this.searchFilters.companyName
       }).then(results => {
         this.pageLoading = false;
         if (results.data.code == 0) {

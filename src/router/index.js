@@ -13,6 +13,10 @@ export default new Router({
     name: 'map',
     component: (resolve) => require(['@/components/map'], resolve)
   }, {
+    path: '/allCompany',
+    name: 'allCompany',
+    component: (resolve) => require(['@/components/allCompany'], resolve)
+  }, {
     path: '/webKnowledge',
     name: 'webKnowledge',
     component: (resolve) => require(['@/components/webKnowledge'], resolve)
