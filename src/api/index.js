@@ -19,7 +19,7 @@ export const getDomainUrl = function(prefix = '') { //掐指一算五个环境
   let currentUrl = document.location.href.toString();
   let domainUrl = '';
 
-  domainUrl = `${prefix}localhost:8080`; //本地开发环境
+  domainUrl = `${prefix}39.104.88.20:8080`; //本地开发环境
 
   return domainUrl;
 }

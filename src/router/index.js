@@ -12,5 +12,9 @@ export default new Router({
     path: '/map',
     name: 'map',
     component: (resolve) => require(['@/components/map'], resolve)
+  }, {
+    path: '/webKnowledge',
+    name: 'webKnowledge',
+    component: (resolve) => require(['@/components/webKnowledge'], resolve)
   }]
 })
