@@ -31,6 +31,30 @@ const api = {
 
     }
   },
+  getFluid: {
+    url: '/station_waybill/loadallfliud',
+    method: 'get',
+    desc: '获取液厂列表',
+    param: {
+
+    }
+  },
+  getCarrierList: {
+    url: '/station_waybill/loadcoocompany',
+    method: 'get',
+    desc: '获取承运商列表',
+    param: {
+
+    }
+  },
+  getCarrierOrder: {
+    url: '/station_waybill/loadcoocompanyinfo',
+    method: 'get',
+    desc: '获取承运商运单数据',
+    param: {
+
+    }
+  },
 
 }
 export default api;
