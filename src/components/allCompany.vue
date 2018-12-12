@@ -20,7 +20,7 @@
       <el-row>
         <el-col :span="6">
           <el-form-item label="承运商:">
-            <el-select style="width:100%" v-model="searchFilters.carrier" clearable placeholder="请选择" @change="startSearch">
+            <el-select style="width:100%" v-model="searchFilters.carrier" clearable placeholder="请选择" @change="searchCarrierOrder">
               <el-option v-for="(item,key) in carrierList" :key="key" :label="item.coocompany" :value="item.coocompany"></el-option>
             </el-select>
           </el-form-item>
@@ -244,6 +244,8 @@ export default {
 
       });
 
+      this.totalSalsum = this.totalSalsum.toFixed(3);
+
       this.tradeEchartsData = {
         salsumData: salsumData,
         waycountData: waycountData,
@@ -256,7 +258,7 @@ export default {
       this.tradeChart.setOption(option);
     },
     getCarrierOpt() {
-      let subtextStr = `总承运量：${this.totalSumweight}顿，总销售单数${this.carrierTotalCount}单`;
+      let subtextStr = `总承运量：${this.totalSumweight}顿，总承运单数${this.carrierTotalCount}单`;
       let option = {
         title: {
           text: '承运商承运总量占比图',
@@ -305,7 +307,7 @@ export default {
             }
           }
         }, {
-          name: '销售单数',
+          name: '承运单数',
           type: 'pie',
 
           label: {
@@ -366,6 +368,8 @@ export default {
         this.carrierTotalCount += item.waycount;
 
       });
+
+      this.totalSumweight = this.totalSumweight.toFixed(3);
 
       this.carrierEchartsData = {
         salsumData: salsumData,
@@ -436,7 +440,7 @@ export default {
 
             let longtitude = tradeMarkerList ? 'longti' : 'longtitude';
             let latitude = tradeMarkerList ? 'laiti' : 'latitude';
-            let salsum = tradeMarkerList ? 'sumweight' : 'salsum';
+            let salsum = tradeMarkerList ? 'salsum' : 'sumweight';
             let offset = tradeMarkerList ? new AMap.Pixel(-15, -20) : new AMap.Pixel(-15, 20);
             console.log('offset', offset);
             let iconStyle = tradeMarkerList ? {
@@ -471,9 +475,16 @@ export default {
 
               getInfoWindow: (data, context, recycledInfoWindow) => {
                 let infoTitleStr = '<div class="marker-info-window"><span class="fs-13">' + data.station_name + '</span>';
-                let infoBodyStr = '<div class="fs-13 md-5">销售总额：' + data[salsum] +
-                  '元</div><div class="fs-13 md-5">销售单数：' + data.waycount +
-                  '</div>'
+                let infoBodyStr = '';
+                if (tradeMarkerList) {
+                  infoBodyStr = '<div class="fs-13 md-5">销售总额：' + data[salsum] +
+                    '元</div><div class="fs-13 md-5">销售单数：' + data.waycount +
+                    '</div>';
+                } else {
+                  infoBodyStr = '<div class="fs-13 md-5">承运总量：' + data[salsum] +
+                    '顿</div><div class="fs-13 md-5">承运单数：' + data.waycount +
+                    '</div>';
+                }
                 if (recycledInfoWindow) {
                   recycledInfoWindow.setInfoTitle(infoTitleStr);
                   recycledInfoWindow.setInfoBody(infoBodyStr);
@@ -697,7 +708,7 @@ export default {
       return this.$$http("getCarrierOrder", {
           stime: startTimeStr,
           etime: endTimeStr,
-          companyname: this.searchFilters.carrier
+          carrier_name: this.searchFilters.carrier
         })
         .then(results => {
           if (results.data.code == 0) {
@@ -707,7 +718,7 @@ export default {
     },
     searchCarrierOrder() {
       this.pageLoading = true;
-      this.getTradeOrder().then(result => {
+      this.getCarrierOrder().then(result => {
         this.pageLoading = false;
         this.renderMarker();
         this.setCarrierOption();

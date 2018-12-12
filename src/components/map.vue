@@ -36,6 +36,8 @@ export default {
         selectedData: [],
         legendData: [],
       },
+      totalSalsum: 0,
+      totalCount: 0,
       pageLoading: false,
 
     }
@@ -47,9 +49,15 @@ export default {
 
   methods: {
     getOpt() {
+      let subtextStr = `总销售额：${this.totalSalsum}元，总销售单数${this.totalCount}单`;
       let option = {
         title: {
-          text: '销售总额占比图',
+          text: '贸易商销售总额占比图',
+          subtext: subtextStr,
+          subtextStyle: {
+            color: '#333',
+            fontSize: '14'
+          },
           x: 'center'
         },
         tooltip: {
@@ -121,30 +129,39 @@ export default {
     },
     setOption() {
       let dom = document.getElementById('echarts-container');
-
       let resultDataCopy = [...this.resultData];
-      resultDataCopy.sort(this.compare("salsum"));
-      let salsumData = resultDataCopy.map(item => {
-        return {
-          name: item.station_name,
-          value: item.salsum
-        }
-      });
-      let waycountData = resultDataCopy.map(item => {
-        return {
-          name: item.station_name,
-          value: item.waycount
-        }
-      });
-      let legendData = resultDataCopy.map(item => item.station_name);
-
+      let salsumData = [];
+      let waycountData = [];
+      let legendData = [];
       let selectedData = {};
+      this.totalSalsum = 0;
+      this.totalCount = 0;
+
+      resultDataCopy.sort(this.compare("salsum"));
 
       resultDataCopy.map((item, index) => {
-        selectedData[item.station_name] = index < 10
-      })
 
-      console.log('selectedData', selectedData);
+        waycountData.push({
+          name: item.station_name,
+          value: item.waycount
+        });
+
+        salsumData.push({
+          name: item.station_name,
+          value: item.salsum
+        });
+
+        legendData.push(item.station_name);
+
+        selectedData[item.station_name] = index < 10;
+
+        this.totalSalsum += item.salsum;
+        this.totalCount += item.waycount;
+      });
+
+      this.totalSalsum = this.totalSalsum.toFixed(3);
+
+
       this.echartsData = {
         salsumData: salsumData,
         waycountData: waycountData,
@@ -154,49 +171,6 @@ export default {
       let option = this.getOpt();
       this.myChart = this.$echarts.init(dom);
       this.myChart.setOption(option);
-
-      /*this.myChart.on('mouseover', 'series.pie', (params) => {
-        if (params.seriesIndex === 0) {
-          this.myChart.dispatchAction({
-            type: 'pieSelect',
-            // 可选，系列 index，可以是一个数组指定多个系列
-            seriesIndex: 1,
-            // 数据的 index，如果不指定也可以通过 name 属性根据名称指定数据
-            dataIndex: params.dataIndex,
-          })
-        } else {
-          this.myChart.dispatchAction({
-            type: 'pieSelect',
-            // 可选，系列 index，可以是一个数组指定多个系列
-            seriesIndex: 0,
-            // 数据的 index，如果不指定也可以通过 name 属性根据名称指定数据
-            dataIndex: params.dataIndex,
-          })
-        }
-      });
-
-      this.myChart.on('mouseout', 'series.pie', (params) => {
-        if (params.seriesIndex === 0) {
-          this.myChart.dispatchAction({
-            type: 'pieUnSelect',
-            // 可选，系列 index，可以是一个数组指定多个系列
-            seriesIndex: 1,
-            // 数据的 index，如果不指定也可以通过 name 属性根据名称指定数据
-            dataIndex: params.dataIndex,
-          })
-        } else {
-          this.myChart.dispatchAction({
-            type: 'pieUnSelect',
-            // 可选，系列 index，可以是一个数组指定多个系列
-            seriesIndex: 0,
-            // 数据的 index，如果不指定也可以通过 name 属性根据名称指定数据
-            dataIndex: params.dataIndex,
-          })
-        }
-      });*/
-
-
-
     },
     dateToStr: function(date) {
       let dateDetail = this.getDateDetail(date);
@@ -234,7 +208,6 @@ export default {
         this.pageLoading = false;
         if (results.data.code == 0) {
           this.resultData = results.data.data;
-          console.log('this.resultData', this.resultData);
         }
       }).catch(() => {
         this.pageLoading = false;
@@ -362,7 +335,6 @@ export default {
     startSearch() {
       this.getdata().then(result => {
         this.renderMarker();
-
         this.setOption();
       });
     }
