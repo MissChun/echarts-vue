@@ -46,6 +46,7 @@
     <div class="map-title">业务单全国分布图</div>
     <div id="map-container"></div>
     <div id="echarts-container"></div>
+    <div id="carrier-echarts-container"></div>
   </div>
 </template>
 <script>
@@ -70,13 +71,24 @@ export default {
       pageLoading: false,
       getFuildLoading: true,
       /*echarts相关*/
-      echartsData: { //echart相关数据
+      tradeChart: '',
+      tradeEchartsData: { //echart相关数据
         data: [],
         selectedData: [],
         legendData: [],
       },
       totalSalsum: 0, //总销售额
       totalCount: 0, //总销售单数
+
+      carrierChart: '',
+      carrierEchartsData: {
+        data: [],
+        selectedData: [],
+        legendData: [],
+      },
+      totalSumweight: 0, //总承运量
+      carrierTotalCount: 0, //总销售单数
+
       /*地图相关实例*/
       map: '', //地图实例
       tradeMarkerList: '', //业务单分布站点marker实例列表
@@ -99,24 +111,32 @@ export default {
         zoom: 5
       });
       this.initMarkList();
-      this.getTradeOrder().then(result => {
-        this.renderMarker();
-        this.setOption();
-        this.initCircle();
-      });
-      this.getCarrierOrder().then(result => {
-        this.renderMarker();
-      })
+      this.getData();
       this.getCompany();
       this.getFluid();
       this.getCarrierList();
     },
 
-    getOpt() {
+    getData() {
+      let p1 = this.getTradeOrder();
+      let p2 = this.getCarrierOrder();
+      this.pageLoading = true;
+      Promise.all([p1, p2]).then(() => {
+        this.pageLoading = false;
+        this.renderMarker();
+        this.setTradeOption();
+        this.setCarrierOption();
+        this.initCircle();
+      }).catch(() => {
+        this.pageLoading = false;
+      })
+    },
+
+    getTradeOpt() {
       let subtextStr = `总销售额：${this.totalSalsum}元，总销售单数${this.totalCount}单`;
       let option = {
         title: {
-          text: '销售总额占比图',
+          text: '贸易商销售总额占比图',
           subtext: subtextStr,
           subtextStyle: {
             color: '#333',
@@ -144,15 +164,15 @@ export default {
           right: 50,
           top: 10,
           bottom: 20,
-          data: this.echartsData.legendData,
-          selected: this.echartsData.selectedData
+          data: this.tradeEchartsData.legendData,
+          selected: this.tradeEchartsData.selectedData
         },
         series: [{
           name: '销售总额',
           type: 'pie',
           radius: ['40%', '65%'],
           center: ['40%', '50%'],
-          data: this.echartsData.salsumData,
+          data: this.tradeEchartsData.salsumData,
           legendHoverLink: true,
           itemStyle: {
             emphasis: {
@@ -179,7 +199,7 @@ export default {
           radius: ['0%', '30%'],
           center: ['40%', '50%'],
           legendHoverLink: true,
-          data: this.echartsData.waycountData,
+          data: this.tradeEchartsData.waycountData,
           itemStyle: {
             emphasis: {
               shadowBlur: 10,
@@ -191,13 +211,15 @@ export default {
       };
       return option;
     },
-    setOption() {
+    setTradeOption() {
       let dom = document.getElementById('echarts-container');
       let resultDataCopy = [...this.resultData];
       let salsumData = [];
       let waycountData = [];
       let legendData = [];
       let selectedData = {};
+      this.totalSalsum = 0;
+      this.totalCount = 0;
 
       resultDataCopy.sort(this.compare("salsum"));
 
@@ -222,16 +244,139 @@ export default {
 
       });
 
-      this.echartsData = {
+      this.tradeEchartsData = {
         salsumData: salsumData,
         waycountData: waycountData,
         selectedData: selectedData,
         legendData: legendData,
       }
 
-      let option = this.getOpt();
-      this.myChart = this.$echarts.init(dom);
-      this.myChart.setOption(option);
+      let option = this.getTradeOpt();
+      this.tradeChart = this.$echarts.init(dom);
+      this.tradeChart.setOption(option);
+    },
+    getCarrierOpt() {
+      let subtextStr = `总承运量：${this.totalSumweight}顿，总销售单数${this.carrierTotalCount}单`;
+      let option = {
+        title: {
+          text: '承运商承运总量占比图',
+          subtext: subtextStr,
+          subtextStyle: {
+            color: '#333',
+            fontSize: '14'
+          },
+          x: 'center'
+        },
+        tooltip: {
+          trigger: 'item',
+          formatter: "{a} <br/>{b} : {c} ({d}%)"
+        },
+        toolbox: {
+          show: true,
+          right: '20%',
+          feature: {
+            dataView: {
+              readOnly: false
+            },
+            saveAsImage: {}
+          }
+        },
+        legend: {
+          type: 'scroll',
+          orient: 'vertical',
+          right: 50,
+          top: 10,
+          bottom: 20,
+          data: this.carrierEchartsData.legendData,
+          selected: this.carrierEchartsData.selectedData
+        },
+        series: [{
+          name: '承运总量',
+          type: 'pie',
+          radius: ['40%', '65%'],
+          center: ['40%', '50%'],
+          data: this.carrierEchartsData.salsumData,
+          legendHoverLink: true,
+          itemStyle: {
+            emphasis: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
+          }
+        }, {
+          name: '销售单数',
+          type: 'pie',
+
+          label: {
+            normal: {
+              show: false,
+            },
+
+          },
+          labelLine: {
+            normal: {
+              show: false
+            }
+          },
+          radius: ['0%', '30%'],
+          center: ['40%', '50%'],
+          legendHoverLink: true,
+          data: this.carrierEchartsData.waycountData,
+          itemStyle: {
+            emphasis: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
+          }
+        }]
+      };
+      return option;
+    },
+    setCarrierOption() {
+      let dom = document.getElementById('carrier-echarts-container');
+      let resultDataCopy = [...this.carrierOrderList];
+      let salsumData = [];
+      let waycountData = [];
+      let legendData = [];
+      let selectedData = {};
+      this.totalSumweight = 0;
+      this.carrierTotalCount = 0;
+
+      resultDataCopy.sort(this.compare("sumweight"));
+
+      resultDataCopy.map((item, index) => {
+
+        waycountData.push({
+          name: item.station_name,
+          value: item.waycount
+        });
+
+        salsumData.push({
+          name: item.station_name,
+          value: item.sumweight
+        });
+
+        legendData.push(item.station_name);
+
+        selectedData[item.station_name] = index < 10;
+
+        this.totalSumweight += item.sumweight;
+        this.carrierTotalCount += item.waycount;
+
+      });
+
+      this.carrierEchartsData = {
+        salsumData: salsumData,
+        waycountData: waycountData,
+        selectedData: selectedData,
+        legendData: legendData,
+      }
+
+      let option = this.getCarrierOpt();
+      this.carrierChart = this.$echarts.init(dom);
+      this.carrierChart.setOption(option);
     },
     dateToStr(date) {
       let dateDetail = this.getDateDetail(date);
@@ -260,21 +405,17 @@ export default {
       let startTimeStr = this.dateToStr(startTime);
       let endTime = new Date(Date.parse(this.searchFilters.timeParam[1]));
       let endTimeStr = this.dateToStr(endTime);
-      this.pageLoading = true;
+
       return this.$$http("getMapData", {
           stime: startTimeStr,
           etime: endTimeStr,
           companyname: this.searchFilters.companyName
         })
         .then(results => {
-          this.pageLoading = false;
           if (results.data.code == 0) {
             this.resultData = results.data.data;
           }
         })
-        .catch(() => {
-          this.pageLoading = false;
-        });
     },
 
     initMarkList() {
@@ -286,15 +427,34 @@ export default {
             showZoomNum: true //显示zoom值
           }));
 
-          const initMarkListFun = (iconIndex, longtitude, latitude, offset) => {
-            //写到这里
-            let offsetNum = -37;
+          //内置的样式
+          var iconStyles = SimpleMarker.getBuiltInIconStyles('default');
 
-            if (offset != undefined) {
-              offsetNum = offset;
+          console.log('iconStyles', iconStyles);
+
+          const initMarkListFun = (tradeMarkerList) => {
+
+            let longtitude = tradeMarkerList ? 'longti' : 'longtitude';
+            let latitude = tradeMarkerList ? 'laiti' : 'latitude';
+            let salsum = tradeMarkerList ? 'sumweight' : 'salsum';
+            let offset = tradeMarkerList ? new AMap.Pixel(-15, -20) : new AMap.Pixel(-15, 20);
+            console.log('offset', offset);
+            let iconStyle = tradeMarkerList ? {
+              src: require('../assets/imgs/red.png'),
+              style: {
+                width: '29px',
+                height: '40px',
+              }
+            } : {
+              src: require('../assets/imgs/green.png'),
+              style: {
+                width: '29px',
+                height: '40px',
+
+                transform: 'rotate(180deg)'
+              }
             }
-
-            console.log('offsetNum', offsetNum);
+            //写到这里
             return new MarkerList({
 
               map: this.map,
@@ -311,7 +471,7 @@ export default {
 
               getInfoWindow: (data, context, recycledInfoWindow) => {
                 let infoTitleStr = '<div class="marker-info-window"><span class="fs-13">' + data.station_name + '</span>';
-                let infoBodyStr = '<div class="fs-13 md-5">销售总额：' + data.salsum +
+                let infoBodyStr = '<div class="fs-13 md-5">销售总额：' + data[salsum] +
                   '元</div><div class="fs-13 md-5">销售单数：' + data.waycount +
                   '</div>'
                 if (recycledInfoWindow) {
@@ -336,10 +496,10 @@ export default {
 
                 return new SimpleMarker({
                   containerClassNames: 'my-marker',
-                  iconTheme: iconTheme,
-                  iconStyle: iconStyles[iconIndex],
+                  offset: offset,
+                  iconStyle: iconStyle,
                   iconLabel: {
-                    innerHTML: dataItem.waycount,
+                    innerHTML: '<span style="line-height:38px">' + dataItem.waycount + '</span>',
                     style: {
                       //颜色, #333, red等等，这里仅作示例，取iconStyle中首尾相对的颜色
                       color: '#fff'
@@ -363,8 +523,8 @@ export default {
             });
           }
 
-          this.tradeMarkerList = initMarkListFun(17, 'longti', 'laiti', 0);
-          this.carrierMarkerList = initMarkListFun(8, 'longtitude', 'latitude');
+          this.tradeMarkerList = initMarkListFun('tradeMarkerList');
+          this.carrierMarkerList = initMarkListFun();
 
         });
     },
@@ -446,8 +606,6 @@ export default {
         this.carrierMarkerList.render(this.carrierOrderList);
         this.tradeMarkerList.render(this.resultData);
 
-
-
         this.map.plugin(["AMap.MarkerClusterer"], () => {
           this.allMakers = [...this.tradeMarkerList.getAllMarkers(), ...this.carrierMarkerList.getAllMarkers()];
           console.log('this.allMakers', this.allMakers);
@@ -492,9 +650,11 @@ export default {
       });
     },
     startSearch() {
+      this.pageLoading = true;
       this.getTradeOrder().then(result => {
+        this.pageLoading = false;
         this.renderMarker();
-        this.setOption();
+        this.setTradeOption();
       });
     },
     getFluid() {
@@ -546,9 +706,13 @@ export default {
         })
     },
     searchCarrierOrder() {
-
+      this.pageLoading = true;
+      this.getTradeOrder().then(result => {
+        this.pageLoading = false;
+        this.renderMarker();
+        this.setCarrierOption();
+      });
     }
-
   },
   created() {
 
@@ -566,7 +730,7 @@ export default {
   height: 50px;
   width: 100%;
   left: 0;
-  top: 160px;
+  top: 290px;
 
   /deep/ .el-loading-mask {
     background-color: rgba(250, 250, 250, 0);
@@ -588,8 +752,16 @@ export default {
 #echarts-container {
   width: 100%;
   padding-top: 20px;
-  height: 1000px;
+  height: 800px;
 }
+
+#carrier-echarts-container {
+  width: 100%;
+  padding-top: 20px;
+  height: 800px;
+}
+
+
 
 .fs-13 {
   font-size: 13px;
