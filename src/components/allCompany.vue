@@ -67,6 +67,7 @@ export default {
       fluidList: [], //液场列表数据
       companyList: [], //公司列表
       choosedFuildList: [],
+      fluidBillData: '',
       carrierList: [],
       pageLoading: false,
       getFuildLoading: true,
@@ -96,7 +97,6 @@ export default {
       markerList: '',
       allMakers: '', //获取的所有marker
       cluster: '', //点聚合实例
-      circleCenter: [116.433322, 39.900255],
       circleList: [], //液厂同心圆实例列表
       textMarkerList: [], //textmarker列表，用于标注圆半径公里
       fluidMarkerList: [], //所选液场marker列表
@@ -258,7 +258,7 @@ export default {
       this.tradeChart.setOption(option);
     },
     getCarrierOpt() {
-      let subtextStr = `总承运量：${this.totalSumweight}顿，总承运单数${this.carrierTotalCount}单`;
+      let subtextStr = `总承运量：${this.totalSumweight}吨，总承运单数${this.carrierTotalCount}单`;
       let option = {
         title: {
           text: '承运商承运总量占比图',
@@ -482,7 +482,7 @@ export default {
                     '</div>';
                 } else {
                   infoBodyStr = '<div class="fs-13 md-5">承运总量：' + data[salsum] +
-                    '顿</div><div class="fs-13 md-5">承运单数：' + data.waycount +
+                    '吨</div><div class="fs-13 md-5">承运单数：' + data.waycount +
                     '</div>';
                 }
                 if (recycledInfoWindow) {
@@ -547,6 +547,8 @@ export default {
       this.textMarkerList = [];
       this.fluidMarkerList = [];
 
+      console.log('this.choosedFuildList', this.choosedFuildList);
+
       for (let i = 0, _length = this.choosedFuildList.length; i < _length; i++) {
         let radius = 100000;
         let strokeOpacity = 1;
@@ -571,11 +573,26 @@ export default {
           let circleCenterLngLat = new AMap.LngLat(this.choosedFuildList[i].longtitude, this.choosedFuildList[i].latitude);
 
           let textPosition = circleCenterLngLat.offset(Math.sqrt((radius * radius) / 2), Math.sqrt((radius * radius) / 2));
-
+          let textPositionTwo = circleCenterLngLat.offset(0, radius);
+          let text = '';
+          if (this.choosedFuildList[i].bill) {
+            text = `${this.choosedFuildList[i].bill[j].min}~${this.choosedFuildList[i].bill[j].max}`
+          } else {
+            text = '';
+          }
           let textMarker = new AMap.Text({
-            text: `${radius/1000}`,
+            text: `${ radius / 1000 }`,
             position: textPosition,
             angle: '45',
+            style: {
+              'font-size': '12px',
+              'background-color': '#fff',
+            }
+          });
+
+          let textMarkerTow = new AMap.Text({
+            text: text,
+            position: textPositionTwo,
             style: {
               'font-size': '12px',
               'background-color': '#fff',
@@ -607,6 +624,7 @@ export default {
           radius += 50000;
           this.circleList.push(circle);
           this.textMarkerList.push(textMarker);
+          this.textMarkerList.push(textMarkerTow);
           this.fluidMarkerList.push(fluidMaker);
           this.textMarkerList.push(fluidLabel);
         }
@@ -684,18 +702,30 @@ export default {
           this.getFuildLoading = false;
         });
     },
-    fluidChange() {
-      this.choosedFuildList = [];
-      this.searchFilters.fluid.map((item, index) => {
-        this.fluidList.map((fluidItem, fluidIndex) => {
-          if (item === fluidItem.fliud_name) {
-            this.choosedFuildList.push(fluidItem);
+    getFluidBill() {
+      return this.$$http("getFluidBill", {
+          fluid_name: this.searchFilters.fluid
+        })
+        .then(results => {
+          if (results.data.code == 0) {
+            this.fluidBillData = results.data.data;
           }
         })
+    },
+    fluidChange() {
+      this.getFluidBill().then(() => {
+        this.choosedFuildList = [];
+        this.searchFilters.fluid.map((item, index) => {
+          this.fluidList.map((fluidItem, fluidIndex) => {
+            if (item === fluidItem.fliud_name) {
+              fluidItem.bill = this.fluidBillData[fluidItem.fliud_name] ? Object.values(this.fluidBillData[fluidItem.fliud_name]) : '';
+              this.choosedFuildList.push(fluidItem);
+            }
+          })
+        })
+        console.log('this.choosedFuildList', this.choosedFuildList);
+        this.initCircle();
       })
-
-      this.initCircle();
-
     },
     getCarrierList() {
       return this.$$http("getCarrierList").then(results => {

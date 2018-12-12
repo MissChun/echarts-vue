@@ -9,6 +9,15 @@
           </el-form-item>
         </el-col>
       </el-row>
+      <el-row type="flex" justify="left">
+        <el-col :span="6">
+          <el-form-item label="液厂:">
+            <el-select style="width:100%" v-model="searchFilters.fluid" :loading="getFuildLoading" filterable multiple clearable placeholder="请选择" @change="fluidChange">
+              <el-option v-for="(item,key) in fluidList" :key="key" :label="item.fliud_name" :value="item.fliud_name"></el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
     <div class="map-loading" v-loading="pageLoading"></div>
     <div class="map-title">业务单全国分布图</div>
@@ -17,15 +26,19 @@
   </div>
 </template>
 <script>
-require('echarts-amap')
+let lngIcon = require('@/assets/imgs/lng_2.png')
 export default {
   name: 'mapAalasis',
   data() {
     return {
       resultData: [],
+      fluidList: [],
+      choosedFuildList: [],
+      getFuildLoading: true,
       searchFilters: {
         timeParam: [new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date()],
-        companyName: '龙口胜通能源有限公司'
+        companyName: '龙口胜通能源有限公司',
+        fluid: '',
       },
       map: '',
       markerList: '',
@@ -36,6 +49,9 @@ export default {
         selectedData: [],
         legendData: [],
       },
+      circleList: [],
+      textMarkerList: [],
+      fluidMarkerList: [],
       totalSalsum: 0,
       totalCount: 0,
       pageLoading: false,
@@ -337,7 +353,109 @@ export default {
         this.renderMarker();
         this.setOption();
       });
-    }
+    },
+    initCircle() {
+
+      //清除地图上的圆及相关公里展示
+      this.circleList.length && this.map.remove([...this.circleList, ...this.textMarkerList, ...this.fluidMarkerList]);
+      this.circleList = [];
+      this.textMarkerList = [];
+      this.fluidMarkerList = [];
+
+      for (let i = 0, _length = this.choosedFuildList.length; i < _length; i++) {
+        let radius = 100000;
+        let strokeOpacity = 1;
+        for (let j = 0; j < 7; j++) {
+          if (j > 2) {
+            strokeOpacity -= 0.2;
+          }
+          let circle = new AMap.Circle({
+            center: [this.choosedFuildList[i].longtitude, this.choosedFuildList[i].latitude],
+            radius: radius, //半径
+            strokeColor: "#4A9BF8",
+            strokeOpacity: 1,
+            strokeWeight: 1.6,
+            strokeOpacity: strokeOpacity,
+            fillOpacity: 0,
+            strokeDasharray: [10, 10],
+            // 线样式还支持 'dashed'
+            fillColor: '#4A9BF8',
+            zIndex: 50
+          })
+
+          let circleCenterLngLat = new AMap.LngLat(this.choosedFuildList[i].longtitude, this.choosedFuildList[i].latitude);
+
+          let textPosition = circleCenterLngLat.offset(Math.sqrt((radius * radius) / 2), Math.sqrt((radius * radius) / 2));
+
+          let textMarker = new AMap.Text({
+            text: `${radius/1000}`,
+            position: textPosition,
+            angle: '45',
+            style: {
+              'font-size': '12px',
+              'background-color': '#fff',
+            }
+          });
+
+          let icon = new AMap.Icon({
+            size: new AMap.Size(20, 20), // 图标尺寸
+            image: lngIcon, // Icon的图像
+            imageSize: new AMap.Size(20, 20) // 根据所设置的大小拉伸或压缩图片
+          });
+
+          let fluidMaker = new AMap.Marker({
+            position: [this.choosedFuildList[i].longtitude, this.choosedFuildList[i].latitude],
+            icon: icon,
+            offset: new AMap.Pixel(-10, -10),
+          });
+
+          let fluidLabel = new AMap.Text({
+            text: this.choosedFuildList[i].fliud_name,
+            position: [this.choosedFuildList[i].longtitude, this.choosedFuildList[i].latitude],
+            style: {
+              'font-size': '12px',
+              'background-color': '#fff',
+            },
+            offset: new AMap.Pixel(0, 20),
+          });
+
+          radius += 50000;
+          this.circleList.push(circle);
+          this.textMarkerList.push(textMarker);
+          this.fluidMarkerList.push(fluidMaker);
+          this.textMarkerList.push(fluidLabel);
+        }
+
+      }
+
+      this.map.add([...this.circleList, ...this.textMarkerList, ...this.fluidMarkerList]);
+
+    },
+    getFluid() {
+      return this.$$http("getFluid")
+        .then(results => {
+          this.getFuildLoading = false;
+          if (results.data.code == 0) {
+            this.fluidList = results.data.data;
+          }
+        })
+        .catch(() => {
+          this.getFuildLoading = false;
+        });
+    },
+    fluidChange() {
+      this.choosedFuildList = [];
+      this.searchFilters.fluid.map((item, index) => {
+        this.fluidList.map((fluidItem, fluidIndex) => {
+          if (item === fluidItem.fliud_name) {
+            this.choosedFuildList.push(fluidItem);
+          }
+        })
+      })
+
+      this.initCircle();
+
+    },
 
   },
   created() {
@@ -349,10 +467,11 @@ export default {
       zoom: 5
     });
     this.initMarkList();
+    this.getFluid();
     this.getdata().then(result => {
       this.renderMarker();
-
       this.setOption();
+      this.initCircle();
     });
 
   },

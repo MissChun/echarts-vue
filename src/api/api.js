@@ -55,6 +55,14 @@ const api = {
 
     }
   },
+  getFluidBill: {
+    url: '/station_waybill/loadfliudfreight',
+    method: 'get',
+    desc: '获取某个液厂运费',
+    param: {
+
+    }
+  },
 
 }
 export default api;
