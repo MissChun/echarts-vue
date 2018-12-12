@@ -549,14 +549,18 @@ export default {
 
       for (let i = 0, _length = this.choosedFuildList.length; i < _length; i++) {
         let radius = 100000;
+        let strokeOpacity = 1;
         for (let j = 0; j < 7; j++) {
+          if (j > 2) {
+            strokeOpacity -= 0.2;
+          }
           let circle = new AMap.Circle({
             center: [this.choosedFuildList[i].longtitude, this.choosedFuildList[i].latitude],
             radius: radius, //半径
             strokeColor: "#4A9BF8",
             strokeOpacity: 1,
-            strokeWeight: 1,
-            strokeOpacity: 0.8,
+            strokeWeight: 1.6,
+            strokeOpacity: strokeOpacity,
             fillOpacity: 0,
             strokeDasharray: [10, 10],
             // 线样式还支持 'dashed'
