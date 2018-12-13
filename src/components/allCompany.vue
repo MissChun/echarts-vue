@@ -547,8 +547,6 @@ export default {
       this.textMarkerList = [];
       this.fluidMarkerList = [];
 
-      console.log('this.choosedFuildList', this.choosedFuildList);
-
       for (let i = 0, _length = this.choosedFuildList.length; i < _length; i++) {
         let radius = 100000;
         let strokeOpacity = 1;

@@ -55,6 +55,7 @@ export default {
       totalSalsum: 0,
       totalCount: 0,
       pageLoading: false,
+      fluidBillData: '',
 
     }
   },
@@ -386,11 +387,26 @@ export default {
           let circleCenterLngLat = new AMap.LngLat(this.choosedFuildList[i].longtitude, this.choosedFuildList[i].latitude);
 
           let textPosition = circleCenterLngLat.offset(Math.sqrt((radius * radius) / 2), Math.sqrt((radius * radius) / 2));
-
+          let textPositionTwo = circleCenterLngLat.offset(0, radius);
+          let text = '';
+          if (this.choosedFuildList[i].bill) {
+            text = `${this.choosedFuildList[i].bill[j].min}~${this.choosedFuildList[i].bill[j].max}`
+          } else {
+            text = '';
+          }
           let textMarker = new AMap.Text({
             text: `${radius/1000}`,
             position: textPosition,
             angle: '45',
+            style: {
+              'font-size': '12px',
+              'background-color': '#fff',
+            }
+          });
+
+          let textMarkerTow = new AMap.Text({
+            text: text,
+            position: textPositionTwo,
             style: {
               'font-size': '12px',
               'background-color': '#fff',
@@ -422,6 +438,7 @@ export default {
           radius += 50000;
           this.circleList.push(circle);
           this.textMarkerList.push(textMarker);
+          this.textMarkerList.push(textMarkerTow);
           this.fluidMarkerList.push(fluidMaker);
           this.textMarkerList.push(fluidLabel);
         }
@@ -443,17 +460,31 @@ export default {
           this.getFuildLoading = false;
         });
     },
-    fluidChange() {
-      this.choosedFuildList = [];
-      this.searchFilters.fluid.map((item, index) => {
-        this.fluidList.map((fluidItem, fluidIndex) => {
-          if (item === fluidItem.fliud_name) {
-            this.choosedFuildList.push(fluidItem);
+    getFluidBill() {
+      return this.$$http("getFluidBill", {
+          fluid_name: this.searchFilters.fluid
+        })
+        .then(results => {
+          if (results.data.code == 0) {
+            this.fluidBillData = results.data.data;
           }
         })
-      })
+    },
+    fluidChange() {
 
-      this.initCircle();
+      this.getFluidBill().then(() => {
+        this.choosedFuildList = [];
+        this.searchFilters.fluid.map((item, index) => {
+          this.fluidList.map((fluidItem, fluidIndex) => {
+            if (item === fluidItem.fliud_name) {
+              fluidItem.bill = this.fluidBillData[fluidItem.fliud_name] ? Object.values(this.fluidBillData[fluidItem.fliud_name]) : '';
+              this.choosedFuildList.push(fluidItem);
+            }
+          })
+        })
+        console.log('this.choosedFuildList', this.choosedFuildList);
+        this.initCircle();
+      })
 
     },
 
