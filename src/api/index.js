@@ -19,8 +19,8 @@ export const getDomainUrl = function(prefix = '') { //掐指一算五个环境
   let currentUrl = document.location.href.toString();
   let domainUrl = '';
 
-  domainUrl = `${prefix}39.104.88.20:8080`; //线上开发环境
-  //domainUrl = `${prefix}192.168.0.24:8080`; //本地开发
+  domainUrl = `${prefix}analysis.91lng.com:8080`; //线上开发环境
+  //domainUrl = `${prefix}analysis.91lng.com:8081`; //本地开发
 
   return domainUrl;
 }
