@@ -47,6 +47,68 @@
     <div id="map-container"></div>
     <div id="echarts-container"></div>
     <div id="carrier-echarts-container"></div>
+    <div class="table-list">
+      <el-table :data="waybillOfFluidData" style="width: 100%;" size="mini">
+        <el-table-column prop="fluid_name" align="center" label="液厂名称" width="180">
+        </el-table-column>
+        <el-table-column label=" 100" align="center">
+          <el-table-column prop="100.salsum" label="销售总额" align="center" width="120">
+          </el-table-column>
+          <el-table-column prop="100.waycount" label="总单数" align="center">
+          </el-table-column>
+          <el-table-column prop="100.stationcount" label="总站点数" align="center">
+          </el-table-column>
+        </el-table-column>
+        <el-table-column label="150" align="center">
+          <el-table-column prop="150.salsum" label="销售总额" align="center" width="120">
+          </el-table-column>
+          <el-table-column prop=" 150.waycount" label="总单数" align="center">
+          </el-table-column>
+          <el-table-column prop="150.stationcount" label="总站点数" align="center">
+          </el-table-column>
+        </el-table-column>
+        <el-table-column label="200" align="center">
+          <el-table-column prop="200.salsum" label="销售总额" align="center" width="120">
+          </el-table-column>
+          <el-table-column prop=" 200.waycount" label="总单数" align="center">
+          </el-table-column>
+          <el-table-column prop="200.stationcount" label="总站点数" align="center">
+          </el-table-column>
+        </el-table-column>
+        <el-table-column label="250" align="center">
+          <el-table-column prop="250.salsum" label="销售总额" align="center" width="120">
+          </el-table-column>
+          <el-table-column prop=" 250.waycount" label="总单数" align="center">
+          </el-table-column>
+          <el-table-column prop="250.stationcount" label="总站点数" align="center">
+          </el-table-column>
+        </el-table-column>
+        <el-table-column label="300" align="center">
+          <el-table-column prop="300.salsum" label="销售总额" align="center" width="120">
+          </el-table-column>
+          <el-table-column prop=" 300.waycount" label="总单数" align="center">
+          </el-table-column>
+          <el-table-column prop="300.stationcount" label="总站点数" align="center">
+          </el-table-column>
+        </el-table-column>
+        <el-table-column label="350" align="center">
+          <el-table-column prop="350.salsum" label="销售总额" align="center" width="120">
+          </el-table-column>
+          <el-table-column prop=" 350.waycount" label="总单数" align="center">
+          </el-table-column>
+          <el-table-column prop="350.stationcount" label="总站点数" align="center">
+          </el-table-column>
+        </el-table-column>
+        <el-table-column label="400" align="center">
+          <el-table-column prop="400.salsum" label="销售总额" align="center" width="120">
+          </el-table-column>
+          <el-table-column prop=" 400.waycount" label="总单数" align="center">
+          </el-table-column>
+          <el-table-column prop="400.stationcount" label="总站点数" align="center">
+          </el-table-column>
+        </el-table-column>
+      </el-table>
+    </div>
   </div>
 </template>
 <script>
@@ -69,6 +131,7 @@ export default {
       choosedFuildList: [],
       fluidBillData: '',
       carrierList: [],
+      waybillOfFluidData: [],
       pageLoading: false,
       getFuildLoading: true,
       /*echarts相关*/
@@ -434,15 +497,12 @@ export default {
           //内置的样式
           var iconStyles = SimpleMarker.getBuiltInIconStyles('default');
 
-          console.log('iconStyles', iconStyles);
-
           const initMarkListFun = (tradeMarkerList) => {
 
             let longtitude = tradeMarkerList ? 'longti' : 'longtitude';
             let latitude = tradeMarkerList ? 'laiti' : 'latitude';
             let salsum = tradeMarkerList ? 'salsum' : 'sumweight';
             let offset = tradeMarkerList ? new AMap.Pixel(-15, -20) : new AMap.Pixel(-15, 20);
-            console.log('offset', offset);
             let iconStyle = tradeMarkerList ? {
               src: require('../assets/imgs/red.png'),
               style: {
@@ -639,7 +699,6 @@ export default {
 
         this.map.plugin(["AMap.MarkerClusterer"], () => {
           this.allMakers = [...this.tradeMarkerList.getAllMarkers(), ...this.carrierMarkerList.getAllMarkers()];
-          console.log('this.allMakers', this.allMakers);
           if (this.cluster) {
             this.cluster.setMarkers(this.allMakers);
           } else {
@@ -687,6 +746,9 @@ export default {
         this.renderMarker();
         this.setTradeOption();
       });
+      if (this.searchFilters.fluid.length) {
+        this.getWaybillOfFluid();
+      }
     },
     getFluid() {
       return this.$$http("getFluid")
@@ -710,6 +772,23 @@ export default {
           }
         })
     },
+    getWaybillOfFluid() {
+      let startTime = new Date(Date.parse(this.searchFilters.timeParam[0]));
+      let startTimeStr = this.dateToStr(startTime);
+      let endTime = new Date(Date.parse(this.searchFilters.timeParam[1]));
+      let endTimeStr = this.dateToStr(endTime);
+      return this.$$http("getWaybillOfFluid", {
+          fluid_name: this.searchFilters.fluid,
+          stime: startTimeStr,
+          etime: endTimeStr,
+          companyname: this.searchFilters.companyName
+        })
+        .then(results => {
+          if (results.data.code == 0) {
+            this.waybillOfFluidData = results.data.data;
+          }
+        })
+    },
     fluidChange() {
       this.getFluidBill().then(() => {
         this.choosedFuildList = [];
@@ -721,9 +800,9 @@ export default {
             }
           })
         })
-        console.log('this.choosedFuildList', this.choosedFuildList);
         this.initCircle();
       })
+      this.getWaybillOfFluid();
     },
     getCarrierList() {
       return this.$$http("getCarrierList").then(results => {
@@ -812,6 +891,77 @@ export default {
 
 .md-5 {
   margin-bottom: 5px;
+}
+
+
+
+
+.table-list {
+  min-height: 50px;
+
+  border: 1px solid #e4e7ed;
+  position: relative;
+  margin: 0 20px 50px 20px;
+
+  .adjust {
+    margin-bottom: 10px;
+    min-height: 18px;
+    text-align: left;
+
+    span {
+      float: right;
+      background: #4a9bf8;
+      padding: 1px 6px;
+      border-radius: 4px;
+      color: #fff;
+      line-height: 16px;
+      font-size: 12px;
+    }
+  }
+
+  .el-table--mini {
+    th {
+      padding: 10px 0;
+
+      font-weight: 400;
+
+      color: #303133;
+
+      font-size: 14px;
+    }
+
+    td {
+      .td-hover {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap
+      }
+
+      font-size: 12px;
+    }
+  }
+
+  .el-table__header {
+    th {
+      background: #f2f5fe;
+    }
+  }
+}
+
+.page-list {
+  margin: 20px 0 0 0;
+}
+
+.tabal-height-50 {
+  height: 50px;
+}
+
+.tabal-height-500 {
+  height: 500px;
+
+  /deep/ .el-table__body-wrapper {
+    height: 456px;
+  }
 }
 
 </style>
