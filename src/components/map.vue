@@ -38,7 +38,7 @@
         <el-table-column label="150" align="center">
           <el-table-column prop="150.salsum" label="销售总额" align="center" width="120">
           </el-table-column>
-          <el-table-column prop=" 150.waycount" label="总单数" align="center">
+          <el-table-column prop="150.waycount" label="总单数" align="center">
           </el-table-column>
           <el-table-column prop="150.stationcount" label="总站点数" align="center">
           </el-table-column>
@@ -46,7 +46,7 @@
         <el-table-column label="200" align="center">
           <el-table-column prop="200.salsum" label="销售总额" align="center" width="120">
           </el-table-column>
-          <el-table-column prop=" 200.waycount" label="总单数" align="center">
+          <el-table-column prop="200.waycount" label="总单数" align="center">
           </el-table-column>
           <el-table-column prop="200.stationcount" label="总站点数" align="center">
           </el-table-column>
@@ -54,7 +54,7 @@
         <el-table-column label="250" align="center">
           <el-table-column prop="250.salsum" label="销售总额" align="center" width="120">
           </el-table-column>
-          <el-table-column prop=" 250.waycount" label="总单数" align="center">
+          <el-table-column prop="250.waycount" label="总单数" align="center">
           </el-table-column>
           <el-table-column prop="250.stationcount" label="总站点数" align="center">
           </el-table-column>
@@ -62,7 +62,7 @@
         <el-table-column label="300" align="center">
           <el-table-column prop="300.salsum" label="销售总额" align="center" width="120">
           </el-table-column>
-          <el-table-column prop=" 300.waycount" label="总单数" align="center">
+          <el-table-column prop="300.waycount" label="总单数" align="center">
           </el-table-column>
           <el-table-column prop="300.stationcount" label="总站点数" align="center">
           </el-table-column>
@@ -70,7 +70,7 @@
         <el-table-column label="350" align="center">
           <el-table-column prop="350.salsum" label="销售总额" align="center" width="120">
           </el-table-column>
-          <el-table-column prop=" 350.waycount" label="总单数" align="center">
+          <el-table-column prop="350.waycount" label="总单数" align="center">
           </el-table-column>
           <el-table-column prop="350.stationcount" label="总站点数" align="center">
           </el-table-column>
@@ -78,7 +78,7 @@
         <el-table-column label="400" align="center">
           <el-table-column prop="400.salsum" label="销售总额" align="center" width="120">
           </el-table-column>
-          <el-table-column prop=" 400.waycount" label="总单数" align="center">
+          <el-table-column prop="400.waycount" label="总单数" align="center">
           </el-table-column>
           <el-table-column prop="400.stationcount" label="总站点数" align="center">
           </el-table-column>
