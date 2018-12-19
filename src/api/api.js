@@ -63,6 +63,14 @@ const api = {
 
     }
   },
+  getWaybillOfFluid: {
+    url: '/station_waybill/waybillofstationandfluid',
+    method: 'get',
+    desc: '获取某个液厂运费',
+    param: {
+
+    }
+  },
 
 }
 export default api;
