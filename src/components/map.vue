@@ -22,7 +22,6 @@
     <div class="map-loading" v-loading="pageLoading"></div>
     <div class="map-title">业务单全国分布图</div>
     <div id="map-container"></div>
-    <div id="echarts-container"></div>
     <div class="table-list">
       <el-table :data="waybillOfFluidData" style="width: 100%;" size="mini">
         <el-table-column prop="fluid_name" align="center" label="液厂名称" width="180">
@@ -85,6 +84,7 @@
         </el-table-column>
       </el-table>
     </div>
+    <div id="echarts-container"></div>
   </div>
 </template>
 <script>
@@ -641,7 +641,6 @@ export default {
 
   border: 1px solid #e4e7ed;
   position: relative;
-  margin: 0 20px 50px 20px;
 
   .adjust {
     margin-bottom: 10px;
