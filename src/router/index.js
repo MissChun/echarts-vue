@@ -9,7 +9,7 @@ export default new Router({
     name: 'HelloWorld',
     component: (resolve) => require(['@/components/HelloWorld'], resolve)
   }, {
-    path: '/map',
+    path: '/senton',
     name: 'map',
     component: (resolve) => require(['@/components/map'], resolve)
   }, {
@@ -20,5 +20,13 @@ export default new Router({
     path: '/webKnowledge',
     name: 'webKnowledge',
     component: (resolve) => require(['@/components/webKnowledge'], resolve)
+  }, {
+    path: '/webKnowledge',
+    name: 'webKnowledge',
+    component: (resolve) => require(['@/components/webKnowledge'], resolve)
+  }, {
+    path: '/overview',
+    name: 'overview',
+    component: (resolve) => require(['@/components/overview'], resolve)
   }]
 })

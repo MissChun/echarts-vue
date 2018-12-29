@@ -71,6 +71,22 @@ const api = {
 
     }
   },
+  loadlist: {
+    url: '/bigdata/api/v1/loadlist',
+    method: 'GET',
+    desc: "加载所有液厂和站点",
+    param: {
+
+    }
+  },
+  loadAllTrip: {
+    url: '/bigdata/api/v1/loadAllTrip',
+    method: 'GET',
+    desc: "加载",
+    param: {
+
+    }
+  },
 
 }
 export default api;

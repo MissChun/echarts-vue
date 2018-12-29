@@ -16,6 +16,13 @@
             </el-date-picker>
           </el-form-item>
         </el-col>
+        <el-col :span="6">
+          <el-form-item label="采购液厂:">
+            <el-select style="width:100%" v-model="searchFilters.fluidOfCompany" clearable multiple placeholder="请选择" @change="filterTradeList">
+              <el-option v-for="(item,key) in fluidOfCompanyList" :key="key" :label="item" :value="item"></el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
       </el-row>
       <el-row>
         <el-col :span="6">
@@ -34,7 +41,7 @@
       </el-row>
       <el-row type="flex" justify="left">
         <el-col :span="6">
-          <el-form-item label="液厂:">
+          <el-form-item label="标准液厂:">
             <el-select style="width:100%" v-model="searchFilters.fluid" :loading="getFuildLoading" filterable multiple clearable placeholder="请选择" @change="fluidChange">
               <el-option v-for="(item,key) in fluidList" :key="key" :label="item.fliud_name" :value="item.fliud_name"></el-option>
             </el-select>
@@ -121,10 +128,13 @@ export default {
         timeParam: [new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date()],
         carrierTimeParam: [new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date()],
         companyName: '',
+        fluidOfCompany: '',
         fluid: '',
         carrier: '',
       },
+      fluidOfCompanyList: [],
       resultData: [], //业务单数据
+      resultFilterData: [],
       carrierOrderList: [],
       fluidList: [], //液场列表数据
       companyList: [], //公司列表
@@ -480,11 +490,29 @@ export default {
         })
         .then(results => {
           if (results.data.code == 0) {
-            this.resultData = results.data.data;
+            this.resultData = results.data.data.infoarray;
+            this.resultFilterData = [...this.resultData];
+            this.fluidOfCompanyList = results.data.data.fluidlist;
           }
         })
     },
+    filterTradeList() {
+      this.resultFilterData = [];
+      if (this.searchFilters.fluidOfCompany.length) {
+        this.resultData.forEach(item => {
+          this.searchFilters.fluidOfCompany.forEach(cItem => {
+            if (item.fluid_name === cItem) {
+              this.resultFilterData.push(item);
+            }
+          })
+        })
+      } else {
+        this.resultFilterData = [...this.resultData];
+      }
+      this.renderMarker();
 
+      console.log('searchFilters.fluidOfCompany', this.searchFilters.fluidOfCompany);
+    },
     initMarkList() {
       AMapUI.loadUI(['misc/MarkerList', 'overlay/SimpleMarker', 'overlay/SimpleInfoWindow', 'control/BasicControl'],
         (MarkerList, SimpleMarker, SimpleInfoWindow, BasicControl) => {
@@ -694,8 +722,9 @@ export default {
     },
     renderMarker: function() {
       let renderCluster = () => {
+        console.log('xxxcarrierOrderList', this.carrierOrderList);
         this.carrierMarkerList.render(this.carrierOrderList);
-        this.tradeMarkerList.render(this.resultData);
+        this.tradeMarkerList.render(this.resultFilterData);
 
         this.map.plugin(["AMap.MarkerClusterer"], () => {
           this.allMakers = [...this.tradeMarkerList.getAllMarkers(), ...this.carrierMarkerList.getAllMarkers()];
@@ -707,8 +736,8 @@ export default {
               maxZoom: 17,
             });
           }
-
         });
+
       }
       if (this.tradeMarkerList) {
         renderCluster();
@@ -823,17 +852,18 @@ export default {
         })
         .then(results => {
           if (results.data.code == 0) {
-            this.carrierOrderList = results.data.data;
+            this.carrierOrderList = results.data.data.infoarray;
           }
         })
     },
     searchCarrierOrder() {
       this.pageLoading = true;
-      this.getCarrierOrder().then(result => {
-        this.pageLoading = false;
-        this.renderMarker();
-        this.setCarrierOption();
-      });
+      this.getCarrierOrder()
+        .then(result => {
+          this.pageLoading = false;
+          this.renderMarker();
+          this.setCarrierOption();
+        });
     }
   },
   created() {
