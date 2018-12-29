@@ -287,7 +287,7 @@ export default {
       }).then(results => {
         this.pageLoading = false;
         if (results.data.code == 0) {
-          this.resultData = results.data.data;
+          this.resultData = results.data.data.infoarray;
         }
       }).catch(() => {
         this.pageLoading = false;
