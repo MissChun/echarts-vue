@@ -6,16 +6,16 @@ Vue.use(Router)
 export default new Router({
   routes: [{
     path: '/',
-    name: 'HelloWorld',
-    component: (resolve) => require(['@/components/HelloWorld'], resolve)
+    name: 'allCompany',
+    component: (resolve) => require(['@/components/allCompany'], resolve)
   }, {
     path: '/senton',
     name: 'map',
     component: (resolve) => require(['@/components/map'], resolve)
   }, {
-    path: '/allCompany',
-    name: 'allCompany',
-    component: (resolve) => require(['@/components/allCompany'], resolve)
+    path: '/freight',
+    name: 'freight',
+    component: (resolve) => require(['@/components/HelloWorld'], resolve)
   }, {
     path: '/webKnowledge',
     name: 'webKnowledge',
